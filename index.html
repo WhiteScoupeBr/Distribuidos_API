@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Caroneiro</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+
+        <!-- font awesome -->
+        <script src="https://kit.fontawesome.com/b11b0db6c0.js" crossorigin="anonymous"></script>
+
+        <link rel="stylesheet" type="text/css" media="screen" href="assets/css/style.css" />
+
+    </head>
+
+    <body>
+        <div class="nav_wrapper">
+            <header>
+                <h2>Caroneiros</h2>
+            </header>
+            <nav>
+                <ul>
+                    <button class="btn btn-primary btn-config" type="submit"><a href="index.html">Entrar</a></button>
+                    <button class="btn btn-outline-primary btn-config-outline" type="submit"><a href="cadastrar.html">Cadastrar</a></button>
+                </ul>
+            </nav>
+        </div>
+        <div class="content_area">
+            <div class="form_wrapper">
+                <div class="form-centered">
+                    <header>
+                        <h2>Bem vindo, Caroneiro</h2>
+                    </header>
+                    <form class="sign_in_form" id="signInForm">
+                        <input type="email" id="email" placeholder="Seu email" required>
+                        <input type="password" id="password" placeholder="Senha" name="password" required>
+                        <input type="submit" class="success button" value="Entrar">
+                    </form>
+                    
+                    <!-- Login failure message -->
+                    <div id="loginError" style="background-color: #dddddd; color: red; padding: 5px; display: none"></div>
+                    <footer class="form-elements">Não tem uma conta ainda? <a href="cadastrar.html"
+                            style="color: #2c3e50; font-weight: bolder;">Cadastrar</a></footer>
+                </div>
+            </div>
+        </div>
+        <div class="about_wrapper">
+            <div class="about_content">
+                <div class="about">
+                    <h2>Usuários</h2>
+                    <hr />
+                    <p>
+                        Os usuários são viajantas e passageiros que desejam ir de um lugar para outro ou usuários que estão fazendo uma viagem e desejam encontrar passageiros.
+                    </p>
+                </div>
+                <div class="about">
+                    <h2>Caroneiro</h2>
+                    <hr />
+                    <p>
+                        O caroneiro é qualquer pessoa que possui um carro e quer ir de um lugar para outro e publica sua viagem no aplicativo a fim de encontrar passageiros para compartilhar o passeio.
+                    </p>
+                </div>
+                <div class="about">
+                    <h2>Carona</h2>
+                    <hr />
+                    <p>
+                        O carona é qualquer pessoa que não possui um carro e quer se juntar a um caroneiro em uma viagem postada por ele e concorda com todas as condições por ele especificadas
+                    </p>
+                </div>
+            </div>
+        </div>
+        <footer class="footer_wrapper">
+            <div class="bottom_footer_section">
+                <p>Aplicação 2 Sistemas Distribuídos -  Isadora e João Pedro</p>
+            </div>
+        </footer>
+        <!-- mudar aqui js -->
+        <script src="static/js/login.js" type="module"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+            crossorigin="anonymous"></script>
+    </body>
+
+</html>

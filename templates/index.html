@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Carona</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+
+  <!-- font awesome -->
+  <script src="https://kit.fontawesome.com/b11b0db6c0.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='styles/style.css') }}" />
+
+</head>
+
+<body>
+  <div class="nav_wrapper">
+    <header>
+      <h2>Caroneiros</h2>
+    </header>
+    <nav>
+      <ul>
+        <li><a href="carona.html">Início</a></li>
+        <li> | </li>
+        <li><a href="caronas.html">Minhas caronas</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="content_area">
+    <header class="welcome">
+      <h2>Bem vindo</h2>
+    </header>
+    <div class="request-carpool">
+      <div class="form-centered request-form">
+        <form class="sign_in_form" id="signInForm">
+          <h4>Gostaria de solicitar uma carona?</h4>
+          <br />
+          <input type="text" id="nome" name="nome" placeholder=" Nome" required>
+          <input type="text" id="telefone" name="telefone" placeholder=" Telefone" required>
+          <input type="text" id="origem" name="nome" placeholder=" Origem" required>
+          <input type="text" id="destino" name="email" placeholder=" Destino" required>
+          <input type="date" id="dia" name="celular" placeholder=" Data" required>
+          <br />
+          <br />
+          <input onclick="relato()"  id="submit" value="Solicitar" class="button success">
+        </form>
+      </div>
+    </div>
+    <header class="my-rides">
+      <h2>Minhas Notificações</h2>
+    </header>
+    <header class="my-rides">
+      <h2>Minhas caronas notificadas</h2>
+    </header>
+    <div class="available_ride_offers_wrapper" id="noticacao_caronas">
+      
+  
+    </div>
+    <header class="my-rides">
+      <h2>Minhas caronas</h2>
+    </header>
+    <div class="available_ride_offers_wrapper" id="minhas_caronas">
+      
+  
+    </div>
+
+  </div>
+
+
+
+
+  <footer class="footer_wrapper">
+ 
+  </footer>
+  <!-- mudar aqui js -->
+
+
+  <script src="static/js/available_rides.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+    crossorigin="anonymous"></script>
+
+
+
+
+  <script>
+    var source = new EventSource("http://127.0.0.1:8000/stream ");
+    source.addEventListener('carona', function (event) {
+      var data = JSON.parse(event.data);
+      console.log(data);
+    }, false);
+    source.addEventListener('error', function (event) {
+      console.log("Failed to connect to event stream. Is Redis running?");
+    }, false);
+  </script>
+
+
+
+  <script>
+    var Result;
+    function relato() {
+      let nome = document.getElementById("nome").value;
+      let telefone = document.getElementById("telefone").value;
+      let origem = document.getElementById("origem").value;
+      let destino = document.getElementById("destino").value;
+      let dia = document.getElementById("dia").value;
+
+
+      if (nome && telefone && origem && destino && dia) {
+        var data = new FormData();
+        data.append("nome", nome);
+        data.append("telefone", telefone);
+        data.append("origem", origem);
+        data.append("destino", destino);
+        data.append("dia", dia);
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+
+            Result = JSON.parse(xhr.response);
+            console.log(Result) 
+            insert_carona(Result);
+
+
+          }
+        });
+
+        xhr.open("POST", "http://127.0.0.1:8000/desejo_carona");
+        xhr.send(data);
+      }
+
+
+
+    }
+
+
+    var const_minhas_caronas=0;
+    var const_notificacoes_carona =0 ;
+
+    function insert_carona(item){
+      const_minhas_caronas+=1;
+      var html ='<div onclick="notificacao('+const_minhas_caronas+')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas'+const_minhas_caronas+'">'+item['nome']+'</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas'+const_minhas_caronas+'">'+item['telefone']+'</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas'+const_minhas_caronas+'">'+item['origem']+'</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas'+const_minhas_caronas+'">'+item['destino']+'</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas'+const_minhas_caronas+'">'+item['dia']+'</td> </tr>  </table> </div>';
+
+      document.getElementById("minhas_caronas").innerHTML += html;
+    }
+
+    function notificacao(id){
+      console.log(id);
+
+      var item
+
+
+      let nome = document.getElementById('nome_minhas_caronas'+id).innerText;
+      let telefone = document.getElementById('telefone_minhas_caronas'+id).innerText;
+      let origem = document.getElementById('origem_minhas_caronas'+id).innerText;
+      let destino = document.getElementById('destino_minhas_caronas'+id).innerText;
+      let dia = document.getElementById('dia_minhas_caronas'+id).innerText;
+      console.log(nome);
+
+      if (nome && telefone && origem && destino && dia) {
+        var data = new FormData();
+        data.append("nome", nome);
+        data.append("telefone", telefone);
+        data.append("origem", origem);
+        data.append("destino", destino);
+        data.append("dia", dia);
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+
+            item = JSON.parse(xhr.response);
+            console.log(item) 
+            insert_carona_noti(item);
+
+
+          }
+        });
+
+        xhr.open("POST", "http://127.0.0.1:8000/notificao_desejo_carona");
+        xhr.send(data);
+      }
+    }
+
+    function insert_carona_noti(item){
+      const_notificacoes_carona+=1;
+
+      var html ='<div onclick="remover_noticacao('+const_notificacoes_carona+')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas'+const_notificacoes_carona+'">'+item['nome']+'</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas'+const_notificacoes_carona+'">'+item['telefone']+'</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas'+const_notificacoes_carona+'">'+item['origem']+'</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas'+const_notificacoes_carona+'">'+item['destino']+'</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas'+const_notificacoes_carona+'">'+item['dia']+'</td> </tr> <tr> <th>Id</th> <td id="id_minhas_caronas'+const_minhas_caronas+'">'+item['id']+'</td> </tr> </table> </div>';  
+      document.getElementById("noticacao_caronas").innerHTML += html;
+    }
+
+    function remover_noticacao(id){
+      
+    }
+
+  </script>
+</body>
+
+</html>

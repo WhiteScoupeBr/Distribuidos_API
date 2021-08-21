@@ -23,13 +23,7 @@
     <header>
       <h2>Caroneiros</h2>
     </header>
-    <nav>
-      <ul>
-        <li><a href="carona.html">Início</a></li>
-        <li> | </li>
-        <li><a href="caronas.html">Minhas caronas</a></li>
-      </ul>
-    </nav>
+  
   </div>
 
   <div class="content_area">
@@ -48,35 +42,32 @@
           <input type="date" id="dia" name="celular" placeholder=" Data" required>
           <br />
           <br />
-          <input onclick="relato()"  id="submit" value="Solicitar" class="button success">
+          <input onclick="relato()" type="button" id="submit" value="Solicitar" class="button success">
         </form>
       </div>
     </div>
     <header class="my-rides">
       <h2>Minhas Notificações</h2>
+    <div class="available_ride_offers_wrapper" id="minhas_notificacoes">
+    </div>
     </header>
     <header class="my-rides">
       <h2>Minhas caronas notificadas</h2>
     </header>
     <div class="available_ride_offers_wrapper" id="noticacao_caronas">
-      
-  
     </div>
     <header class="my-rides">
       <h2>Minhas caronas</h2>
     </header>
     <div class="available_ride_offers_wrapper" id="minhas_caronas">
-      
-  
     </div>
-
   </div>
 
 
 
 
   <footer class="footer_wrapper">
- 
+
   </footer>
   <!-- mudar aqui js -->
 
@@ -92,8 +83,10 @@
   <script>
     var source = new EventSource("http://127.0.0.1:8000/stream ");
     source.addEventListener('carona', function (event) {
-      var data = JSON.parse(event.data);
-      console.log(data);
+      var data_notificacao = JSON.parse(event.data);
+      var html = '<div class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td>' + data_notificacao['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td>' + data_notificacao['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td>' + data_notificacao['origem'] + '</td> </tr> <tr> <th>Destino</th> <td>' + data_notificacao['destino'] + '</td> </tr> <tr> <th>Data</th> <td>' + data_notificacao['data'] + '</td> </tr>  </table> </div>';
+      document.getElementById("minhas_notificacoes").innerHTML += html;
+
     }, false);
     source.addEventListener('error', function (event) {
       console.log("Failed to connect to event stream. Is Redis running?");
@@ -118,7 +111,7 @@
         data.append("telefone", telefone);
         data.append("origem", origem);
         data.append("destino", destino);
-        data.append("dia", dia);
+        data.append("data", dia);
 
         var xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
@@ -127,8 +120,8 @@
           if (this.readyState === 4) {
 
             Result = JSON.parse(xhr.response);
-            console.log(Result) 
-            insert_carona(Result);
+            console.log(Result);
+            insert_carona();
 
 
           }
@@ -143,27 +136,49 @@
     }
 
 
-    var const_minhas_caronas=0;
-    var const_notificacoes_carona =0 ;
+    var const_minhas_caronas = 0;
+    var const_notificacoes_carona = 0;
 
-    function insert_carona(item){
-      const_minhas_caronas+=1;
-      var html ='<div onclick="notificacao('+const_minhas_caronas+')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas'+const_minhas_caronas+'">'+item['nome']+'</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas'+const_minhas_caronas+'">'+item['telefone']+'</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas'+const_minhas_caronas+'">'+item['origem']+'</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas'+const_minhas_caronas+'">'+item['destino']+'</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas'+const_minhas_caronas+'">'+item['dia']+'</td> </tr>  </table> </div>';
+    function insert_carona() {
 
-      document.getElementById("minhas_caronas").innerHTML += html;
+      var carona;
+
+      document.getElementById("minhas_caronas").innerHTML = '';
+
+      var xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          carona = JSON.parse(xhr.response);
+          carona.forEach((item) => {
+            const_minhas_caronas += 1;
+            var html = '<div onclick="notificacao(' + const_minhas_caronas + ')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas' + const_minhas_caronas + '">' + item['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas' + const_minhas_caronas + '">' + item['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas' + const_minhas_caronas + '">' + item['origem'] + '</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas' + const_minhas_caronas + '">' + item['destino'] + '</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas' + const_minhas_caronas + '">' + item['data'] + '</td> </tr>  </table> </div>';
+
+            document.getElementById("minhas_caronas").innerHTML += html;
+          });
+
+        }
+      });
+
+      xhr.open("GET", "http://127.0.0.1:8000/get_carona");
+      xhr.send()
     }
 
-    function notificacao(id){
+
+
+
+    function notificacao(id) {
       console.log(id);
 
       var item
 
 
-      let nome = document.getElementById('nome_minhas_caronas'+id).innerText;
-      let telefone = document.getElementById('telefone_minhas_caronas'+id).innerText;
-      let origem = document.getElementById('origem_minhas_caronas'+id).innerText;
-      let destino = document.getElementById('destino_minhas_caronas'+id).innerText;
-      let dia = document.getElementById('dia_minhas_caronas'+id).innerText;
+      let nome = document.getElementById('nome_minhas_caronas' + id).innerText;
+      let telefone = document.getElementById('telefone_minhas_caronas' + id).innerText;
+      let origem = document.getElementById('origem_minhas_caronas' + id).innerText;
+      let destino = document.getElementById('destino_minhas_caronas' + id).innerText;
+      let dia = document.getElementById('dia_minhas_caronas' + id).innerText;
       console.log(nome);
 
       if (nome && telefone && origem && destino && dia) {
@@ -172,7 +187,7 @@
         data.append("telefone", telefone);
         data.append("origem", origem);
         data.append("destino", destino);
-        data.append("dia", dia);
+        data.append("data", dia);
 
         var xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
@@ -181,8 +196,8 @@
           if (this.readyState === 4) {
 
             item = JSON.parse(xhr.response);
-            console.log(item) 
-            insert_carona_noti(item);
+            console.log(item)
+            insert_carona_noti();
 
 
           }
@@ -193,14 +208,52 @@
       }
     }
 
-    function insert_carona_noti(item){
-      const_notificacoes_carona+=1;
+    function insert_carona_noti() {
 
-      var html ='<div onclick="remover_noticacao('+const_notificacoes_carona+')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas'+const_notificacoes_carona+'">'+item['nome']+'</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas'+const_notificacoes_carona+'">'+item['telefone']+'</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas'+const_notificacoes_carona+'">'+item['origem']+'</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas'+const_notificacoes_carona+'">'+item['destino']+'</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas'+const_notificacoes_carona+'">'+item['dia']+'</td> </tr> <tr> <th>Id</th> <td id="id_minhas_caronas'+const_minhas_caronas+'">'+item['id']+'</td> </tr> </table> </div>';  
-      document.getElementById("noticacao_caronas").innerHTML += html;
+      var noti_carona;
+
+      var xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+      document.getElementById("noticacao_caronas").innerHTML = '';
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          noti_carona = JSON.parse(xhr.response);
+          noti_carona.forEach((item) => {
+            const_notificacoes_carona += 1;
+            var html = '<div onclick="remover_noticacao(' + item['id'] + ')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas' + const_notificacoes_carona + '">' + item['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas' + const_notificacoes_carona + '">' + item['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas' + const_notificacoes_carona + '">' + item['origem'] + '</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas' + const_notificacoes_carona + '">' + item['destino'] + '</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas' + const_notificacoes_carona + '">' + item['data'] + '</td> </tr> <tr> <th>Id</th> <td id="id_minhas_caronas' + const_minhas_caronas + '">' + item['id'] + '</td> </tr> </table> </div>';
+
+            
+            document.getElementById("noticacao_caronas").innerHTML += html;
+          });
+
+        }
+      });
+
+      xhr.open("GET", "http://127.0.0.1:8000/get_noti_carona");
+      xhr.send()
+
     }
 
-    function remover_noticacao(id){
+    function remover_noticacao(id) {
+     
+
+        var data = new FormData();
+        data.append("id", id);
+
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+
+            insert_carona_noti();
+
+
+          }
+        });
+
+        xhr.open("POST", "http://127.0.0.1:8000/cancelar_carona");
+        xhr.send(data);
       
     }
 

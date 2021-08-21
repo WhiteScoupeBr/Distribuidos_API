@@ -26,14 +26,14 @@ id_noti_ofereco_carona = 1000
 
 def publish_carona(item):
     with app.app_context():
-        sse.publish({"message": "Hello!"}, type='carona')
+        sse.publish(json.dumps(item), type='carona')
         return 'Notificação enviada carona'
 
 
 
 def publish_caroneiro(item):
     with app.app_context():
-        sse.publish({"message": "Hello!"}, type='caroneiro')
+        sse.publish(json.dumps(item), type='caroneiro')
         return 'Notificação enviada caroneiro'
 
 
@@ -46,6 +46,11 @@ def css():
     return render_template("style.css")
 
 
+@app.route('/caroneiro_page')
+def caroneiro_page():
+    return render_template("caroneiro.html")
+
+
 
 @app.route("/desejo_carona", methods=['POST'])
 def desejo_carona():
@@ -56,6 +61,13 @@ def desejo_carona():
         print(carona)
     return item
 
+@app.route("/get_carona")
+def get_carona():
+    return json.dumps(carona)
+
+@app.route("/get_caroneiro")
+def get_caroneiro():
+    return json.dumps(caroneiro)
 
 @app.route("/ofereco_carona", methods=['POST'])
 def ofereco_carona():
@@ -65,33 +77,37 @@ def ofereco_carona():
         caroneiro.append(item)
         verifica_carona_noti(item)
         print(caroneiro)
-    return "Oferta de carona cadastrada"
+    return item
 
 
 def verifica_caroneiro_noti(carona):
+    global notificacao_caroneiro
     for aux_caroneiro_noti in notificacao_caroneiro:
         if  carona['origem']== aux_caroneiro_noti['origem'] and carona['destino'] == aux_caroneiro_noti['destino'] and carona['data']== aux_caroneiro_noti['data']:
-            publish(carona)
+            publish_caroneiro(carona)
 
 
 #Verifica se a oferta de carona cadastrada satisfaz alguma notificação já cadastrada
 def verifica_carona_noti(caroneiro):
+    global notificacao_carona
     for aux_carona_noti in notificacao_carona:
         if  caroneiro['origem']== aux_carona_noti['origem'] and caroneiro['destino'] == aux_carona_noti['destino'] and caroneiro['data']== aux_carona_noti['data']:
-            publish(caroneiro)
+            publish_carona(caroneiro)
 
 #Verifica se alguma oferta carona já cadastrada satisfaz a viagem ofertada pelo caroneiro
 def verifica_nova_noti_carona(carona):
+    global caroneiro
     for aux_caroneiro in caroneiro:
         if  carona['origem']== aux_caroneiro['origem'] and carona['destino'] == aux_caroneiro['destino'] and carona['data']== aux_caroneiro['data']:
-            publish(aux_caroneiro)
+            publish_carona(aux_caroneiro)
 
 
 #Verifica se alguma carona já cadastrada satisfaz a viagem ofertada pelo caroneiro
 def verifica_nova_noti_caroneiro(caroneiro):
+    global carona
     for aux_carona in carona:
         if  caroneiro['origem']== aux_carona['origem'] and caroneiro['destino'] == aux_carona['destino'] and caroneiro['data']== aux_carona['data']:
-            publish(aux_carona)
+            publish_caroneiro(aux_carona)
 
 
 
@@ -107,6 +123,12 @@ def notificao_desejo_carona():
         verifica_nova_noti_carona(item)
         return item 
 
+
+
+@app.route("/get_noti_carona")
+def get_noti_carona():
+    return json.dumps(notificacao_carona) 
+
 #Cadastra uma notificação, retorna o ID
 @app.route("/notificao_ofereco_carona", methods=['POST'])
 def notificao_ofereco_carona():
@@ -118,14 +140,19 @@ def notificao_ofereco_carona():
         notificacao_caroneiro.append(item)
         print(notificacao_caroneiro)
         verifica_nova_noti_caroneiro(item)
-        return id_noti_ofereco_carona 
+        return json.dumps(item) 
 
+
+@app.route("/get_noti_caroneiro")
+def get_noti_caroneiro():
+    return json.dumps(notificacao_caroneiro) 
 
 #remove a viagem da lista de caronas notificadas
-@app.route("/cancelar_carona", methods=['GET'])
+@app.route("/cancelar_carona", methods=['POST'])
 def cancelar_carona():
-    if request.method == 'GET':
-        id_cancelar = request.args.get('id')
+    if request.method == 'POST':
+        ids = request.form.to_dict()
+        id_cancelar = ids['id']
         print(id_cancelar)
     for dicts in notificacao_carona:
         for key,value in dicts.items():
@@ -140,11 +167,12 @@ def cancelar_carona():
 
 
 #remove a viagem da lista de caroneiros notificados
-@app.route("/cancelar_caroneiro", methods=['GET'])
+@app.route("/cancelar_caroneiro", methods=['POST'])
 def cancelar_caroneiro():
-    if request.method == 'GET':
-            id_cancelar = request.args.get('id')
-            print(id_cancelar)
+    if request.method == 'POST':
+        ids = request.form.to_dict()
+        id_cancelar = ids['id']
+        print(id_cancelar)
     for dicts in notificacao_caroneiro:
         for key,value in dicts.items():
             if (key == 'id'):

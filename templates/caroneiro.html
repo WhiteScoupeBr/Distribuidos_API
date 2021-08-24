@@ -84,6 +84,7 @@
 
 
   <script>
+    /* Coloca o telefone para receber a notificação, conectando no SSE do servidor  */
     function initial() {
 
       var canal = document.getElementById("telefone").value;
@@ -106,6 +107,7 @@
 
   <script>
     var Result;
+    /* Pega os valores dos inputs e envia para o servidor */
     function relato() {
       let nome = document.getElementById("nome").value;
       let telefone = document.getElementById("telefone").value;
@@ -148,6 +150,7 @@
     var const_minhas_caronas = 0;
     var const_notificacoes_carona = 0;
 
+    /* Pega os valores pelo get_caroneiro() e inclui no HTML em forma de tabela */
     function insert_carona() {
 
       var carona;
@@ -176,6 +179,7 @@
 
 
 
+    /* Insere na tabela notificação os valores do card carona*/
     function notificacao(id) {
       console.log(id);
 
@@ -216,6 +220,8 @@
       }
     }
 
+    
+    /* Pega os valores pelo get_notificacao_caroeiro() e inclui no HTML em forma de tabela */
     function insert_carona_noti() {
 
       var noti_carona;
@@ -242,6 +248,7 @@
 
     }
 
+    /* Envia uma requisição para cancelar a notificação, utilizando o Id cadastrado*/
     function remover_noticacao(id) {
 
 

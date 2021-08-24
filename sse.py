@@ -4,12 +4,12 @@ from flask import request
 from flask import jsonify
 import json 
 
-
+#Inicialização do app Flask e comunicação com Redis-server
 app = Flask(__name__)
 app.config["REDIS_URL"] = "redis://localhost"
 app.register_blueprint(sse, url_prefix='/stream')
 
-
+#inicialização das variáveis
 usuario_carona = []
 carona = []
 notificacao_carona = []
@@ -23,7 +23,7 @@ id_noti_ofereco_carona = 1000
 
 
 
-
+#Publicação para carona, utilizando telefone
 def publish_carona(receiver,item):
     telefone=receiver['telefone']
     with app.app_context():
@@ -32,13 +32,14 @@ def publish_carona(receiver,item):
 
 
 
+#Publicação para carona, utilizando telefone
 def publish_caroneiro(receiver,item):
     telefone=receiver['telefone']
     with app.app_context():
         sse.publish(json.dumps(item), type=telefone)
         return 'Notificação enviada caroneiro'
 
-
+#Rota cadastro carona
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -48,12 +49,13 @@ def css():
     return render_template("style.css")
 
 
+#Rota cadastro caroneiro
 @app.route('/caroneiro_page')
 def caroneiro_page():
     return render_template("caroneiro.html")
 
 
-
+#Cadastrar um desejo de carona
 @app.route("/desejo_carona", methods=['POST'])
 def desejo_carona():
     if request.method == 'POST':
@@ -63,14 +65,17 @@ def desejo_carona():
         print(carona)
     return item
 
+#retorna todas as caronas desejadas
 @app.route("/get_carona")
 def get_carona():
     return json.dumps(carona)
 
+#retorna todas as caronas ofertadas
 @app.route("/get_caroneiro")
 def get_caroneiro():
     return json.dumps(caroneiro)
 
+#Cadastrar uma oferta de carona
 @app.route("/ofereco_carona", methods=['POST'])
 def ofereco_carona():
     if request.method == 'POST':
@@ -82,6 +87,7 @@ def ofereco_carona():
     return item
 
 
+#Verifica se a oferta de carona cadastrada satisfaz alguma notificação já cadastrada
 def verifica_caroneiro_noti(carona):
     global notificacao_caroneiro
     for aux_caroneiro_noti in notificacao_caroneiro:
@@ -89,7 +95,7 @@ def verifica_caroneiro_noti(carona):
             publish_caroneiro(aux_caroneiro_noti,carona)
 
 
-#Verifica se a oferta de carona cadastrada satisfaz alguma notificação já cadastrada
+#Verifica se o desejo de carona cadastrada satisfaz alguma notificação já cadastrada
 def verifica_carona_noti(caroneiro):
     global notificacao_carona
     for aux_carona_noti in notificacao_carona:
@@ -112,7 +118,7 @@ def verifica_nova_noti_caroneiro(caroneiro):
             publish_caroneiro(caroneiro,aux_carona)
 
 
-
+#Cadastra uma notificação de desejo de carona
 @app.route("/notificao_desejo_carona", methods=['POST'])
 def notificao_desejo_carona():
     if request.method == 'POST':
@@ -126,12 +132,13 @@ def notificao_desejo_carona():
         return item 
 
 
-
+#Retorna os desejos de carona notificados
 @app.route("/get_noti_carona")
 def get_noti_carona():
     return json.dumps(notificacao_carona) 
 
-#Cadastra uma notificação, retorna o ID
+
+#Cadastra uma notificação de oferta de carona
 @app.route("/notificao_ofereco_carona", methods=['POST'])
 def notificao_ofereco_carona():
     if request.method == 'POST':
@@ -145,6 +152,7 @@ def notificao_ofereco_carona():
         return json.dumps(item) 
 
 
+#Retorna as ofertas de carona notificados
 @app.route("/get_noti_caroneiro")
 def get_noti_caroneiro():
     return json.dumps(notificacao_caroneiro) 

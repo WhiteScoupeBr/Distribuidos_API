@@ -24,16 +24,18 @@ id_noti_ofereco_carona = 1000
 
 
 
-def publish_carona(item):
+def publish_carona(receiver,item):
+    telefone=receiver['telefone']
     with app.app_context():
-        sse.publish(json.dumps(item), type='carona')
+        sse.publish(json.dumps(item), type=telefone)
         return 'Notificação enviada carona'
 
 
 
-def publish_caroneiro(item):
+def publish_caroneiro(receiver,item):
+    telefone=receiver['telefone']
     with app.app_context():
-        sse.publish(json.dumps(item), type='caroneiro')
+        sse.publish(json.dumps(item), type=telefone)
         return 'Notificação enviada caroneiro'
 
 
@@ -84,7 +86,7 @@ def verifica_caroneiro_noti(carona):
     global notificacao_caroneiro
     for aux_caroneiro_noti in notificacao_caroneiro:
         if  carona['origem']== aux_caroneiro_noti['origem'] and carona['destino'] == aux_caroneiro_noti['destino'] and carona['data']== aux_caroneiro_noti['data']:
-            publish_caroneiro(carona)
+            publish_caroneiro(aux_caroneiro_noti,carona)
 
 
 #Verifica se a oferta de carona cadastrada satisfaz alguma notificação já cadastrada
@@ -92,14 +94,14 @@ def verifica_carona_noti(caroneiro):
     global notificacao_carona
     for aux_carona_noti in notificacao_carona:
         if  caroneiro['origem']== aux_carona_noti['origem'] and caroneiro['destino'] == aux_carona_noti['destino'] and caroneiro['data']== aux_carona_noti['data']:
-            publish_carona(caroneiro)
+            publish_carona(aux_carona_noti,caroneiro)
 
 #Verifica se alguma oferta carona já cadastrada satisfaz a viagem ofertada pelo caroneiro
 def verifica_nova_noti_carona(carona):
     global caroneiro
     for aux_caroneiro in caroneiro:
         if  carona['origem']== aux_caroneiro['origem'] and carona['destino'] == aux_caroneiro['destino'] and carona['data']== aux_caroneiro['data']:
-            publish_carona(aux_caroneiro)
+            publish_carona(carona,aux_caroneiro)
 
 
 #Verifica se alguma carona já cadastrada satisfaz a viagem ofertada pelo caroneiro
@@ -107,7 +109,7 @@ def verifica_nova_noti_caroneiro(caroneiro):
     global carona
     for aux_carona in carona:
         if  caroneiro['origem']== aux_carona['origem'] and caroneiro['destino'] == aux_carona['destino'] and caroneiro['data']== aux_carona['data']:
-            publish_caroneiro(aux_carona)
+            publish_caroneiro(caroneiro,aux_carona)
 
 
 

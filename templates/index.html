@@ -42,7 +42,7 @@
           <input type="date" id="dia" name="celular" placeholder=" Data" required>
           <br />
           <br />
-          <input onclick="relato()" type="button" id="submit" value="Solicitar" class="button success">
+          <input onclick="initial()" type="button" id="submit" value="Solicitar" class="button success">
         </form>
       </div>
     </div>
@@ -81,8 +81,11 @@
 
 
   <script>
-    var source = new EventSource("http://127.0.0.1:8000/stream ");
-    source.addEventListener('carona', function (event) {
+    function initial(){
+
+      var canal = document.getElementById("telefone").value;
+      var source = new EventSource("http://127.0.0.1:8000/stream ");
+    source.addEventListener(canal, function (event) {
       var data_notificacao = JSON.parse(event.data);
       var html = '<div class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td>' + data_notificacao['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td>' + data_notificacao['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td>' + data_notificacao['origem'] + '</td> </tr> <tr> <th>Destino</th> <td>' + data_notificacao['destino'] + '</td> </tr> <tr> <th>Data</th> <td>' + data_notificacao['data'] + '</td> </tr>  </table> </div>';
       document.getElementById("minhas_notificacoes").innerHTML += html;
@@ -91,6 +94,10 @@
     source.addEventListener('error', function (event) {
       console.log("Failed to connect to event stream. Is Redis running?");
     }, false);
+
+    relato();
+    }
+    
   </script>
 
 

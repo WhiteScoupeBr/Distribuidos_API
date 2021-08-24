@@ -24,7 +24,7 @@
       <h2>Caroneiros</h2>
     </header>
     <nav>
-    
+
     </nav>
   </div>
 
@@ -45,14 +45,14 @@
           <input type="number" id="n_passageiros" placeholder=" Nº de passageiros" required>
           <br />
           <br />
-          <input  type="button" onclick="relato()" id="submit" value="Solicitar" class="button success">
+          <input type="button" onclick="initial()" id="submit" value="Solicitar" class="button success">
         </form>
       </div>
     </div>
     <header class="my-rides">
       <h2>Minhas Notificações</h2>
-    <div class="available_ride_offers_wrapper" id="minhas_notificacoes">
-    </div>
+      <div class="available_ride_offers_wrapper" id="minhas_notificacoes">
+      </div>
     </header>
     <header class="my-rides">
       <h2>Minhas caronas notificadas</h2>
@@ -84,16 +84,22 @@
 
 
   <script>
-    var source = new EventSource("http://127.0.0.1:8000/stream ");
-    source.addEventListener('caroneiro', function (event) {
-      var data_notificacao = JSON.parse(event.data);
-      var html = '<div class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td>' + data_notificacao['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td>' + data_notificacao['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td>' + data_notificacao['origem'] + '</td> </tr> <tr> <th>Destino</th> <td>' + data_notificacao['destino'] + '</td> </tr> <tr> <th>Data</th> <td>' + data_notificacao['data'] + '</td> </tr>  </table> </div>';
-      document.getElementById("minhas_notificacoes").innerHTML += html;
+    function initial() {
 
-    }, false);
-    source.addEventListener('error', function (event) {
-      console.log("Failed to connect to event stream. Is Redis running?");
-    }, false);
+      var canal = document.getElementById("telefone").value;
+      var source = new EventSource("http://127.0.0.1:8000/stream ");
+      source.addEventListener(canal, function (event) {
+        var data_notificacao = JSON.parse(event.data);
+        var html = '<div class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td>' + data_notificacao['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td>' + data_notificacao['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td>' + data_notificacao['origem'] + '</td> </tr> <tr> <th>Destino</th> <td>' + data_notificacao['destino'] + '</td> </tr> <tr> <th>Data</th> <td>' + data_notificacao['data'] + '</td> </tr>  </table> </div>';
+        document.getElementById("minhas_notificacoes").innerHTML += html;
+
+      }, false);
+      source.addEventListener('error', function (event) {
+        console.log("Failed to connect to event stream. Is Redis running?");
+      }, false);
+
+      relato();
+    }
   </script>
 
 
@@ -122,8 +128,8 @@
         xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
 
-           /*  Result = JSON.parse(xhr.response);
-            console.log(Result); */
+            /*  Result = JSON.parse(xhr.response);
+             console.log(Result); */
             insert_carona();
 
 
@@ -224,7 +230,7 @@
             const_notificacoes_carona += 1;
             var html = '<div onclick="remover_noticacao(' + item['id'] + ')" class="ride_template rides"> <table class="ride-table"> <tr> <th class="table-title">Nome Caroneiro</th> <td id="nome_minhas_caronas' + const_notificacoes_carona + '">' + item['nome'] + '</td> </tr> <tr> <th>Telefone</th> <td id="telefone_minhas_caronas' + const_notificacoes_carona + '">' + item['telefone'] + '</td> </tr> <tr> <th>Origem</th> <td id="origem_minhas_caronas' + const_notificacoes_carona + '">' + item['origem'] + '</td> </tr> <tr> <th>Destino</th> <td id="destino_minhas_caronas' + const_notificacoes_carona + '">' + item['destino'] + '</td> </tr> <tr> <th>Data</th> <td id="dia_minhas_caronas' + const_notificacoes_carona + '">' + item['data'] + '</td> </tr> <tr> <th>Id</th> <td id="id_minhas_caronas' + const_minhas_caronas + '">' + item['id'] + '</td> </tr> </table> </div>';
 
-            
+
             document.getElementById("noticacao_caronas").innerHTML += html;
           });
 
@@ -237,26 +243,26 @@
     }
 
     function remover_noticacao(id) {
-     
-
-        var data = new FormData();
-        data.append("id", id);
-
-        var xhr = new XMLHttpRequest();
-        xhr.withCredentials = true;
-
-        xhr.addEventListener("readystatechange", function () {
-          if (this.readyState === 4) {
-
-            insert_carona_noti();
 
 
-          }
-        });
+      var data = new FormData();
+      data.append("id", id);
 
-        xhr.open("POST", "http://127.0.0.1:8000/cancelar_caroneiro");
-        xhr.send(data);
-      
+      var xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+
+          insert_carona_noti();
+
+
+        }
+      });
+
+      xhr.open("POST", "http://127.0.0.1:8000/cancelar_caroneiro");
+      xhr.send(data);
+
     }
 
   </script>
